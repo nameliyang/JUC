@@ -2,46 +2,37 @@ package com.ly;
 
 
 import com.ly.java.util.concurrent.locks.AbstractQueuedSynchronizer;
+import com.ly.java.util.concurrent.locks.ReentrantLock;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class ReentrantLockTest {
 
     final static ReentrantLock lock = new ReentrantLock();
 
-    final static Condition condition = lock.newCondition();
-
     public static void main(String[] args) throws InterruptedException {
-//        try{
-//            lock.lock();
-//        }finally {
-//            lock.unlock();
-//        }
+        lock.lock();
 
-        condition.await();
+        new Thread(() -> {
+            lock.lock();
+            System.out.println("threadA...");
+            lock.unlock();
+        }).start();
 
-//        final Sync sync = new Sync();
-//        new Thread(() -> {
-//            sync.acquire(1);
-//            System.out.println("threadA...");
-//            sync.release(1);
-//        }).start();
-//
-//        new Thread(() -> {
-//            sync.acquire(1);
-//            System.out.println("threadB...");
-//            sync.release(1);
-//
-//        }).start();
-//
-//        new Thread(() -> {
-//            sync.acquire(1);
-//            System.out.println("threadC...");
-//            sync.release(1);
-//        }).start();
+        new Thread(() -> {
+            lock.lock();
+            System.out.println("threadB...");
+            lock.unlock();
+
+        }).start();
+
+        new Thread(() -> {
+            lock.lock();
+            System.out.println("threadC...");
+            lock.unlock();
+        }).start();
 
     }
+
 
     static class Sync extends AbstractQueuedSynchronizer {
 
@@ -54,6 +45,7 @@ public class ReentrantLockTest {
                     return true;
                 }
             } else if (current == getExclusiveOwnerThread()) {
+
                 //getExclusiveOwnerThread属于
                 int nextc = c + acquires;
                 if (nextc < 0) // overflow

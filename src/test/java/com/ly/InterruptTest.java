@@ -13,6 +13,7 @@ public class InterruptTest {
                 System.out.println("finally");
             }
         });
+
         thread.start();
         thread.interrupt();
     }
